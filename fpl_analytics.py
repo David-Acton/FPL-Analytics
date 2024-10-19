@@ -1,12 +1,14 @@
 import requests
 import matplotlib.pyplot as plt
 
+#Input account ID to retrieve account info
+account_id = input("Please enter your FPL account ID: ")
+
 #Call FPL API
-response = requests.get("https://fantasy.premierleague.com/api/entry/3491665/history/")
+response = requests.get("https://fantasy.premierleague.com/api/entry/" + account_id + "/history/")
 
 #Parse the JSON data
 data = response.json()
-
 
 #Initialize empty lists to hold gameweek numbers and ranks
 gameweeks = []
