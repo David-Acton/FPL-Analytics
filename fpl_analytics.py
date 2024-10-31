@@ -1,37 +1,51 @@
 import requests
 import matplotlib.pyplot as plt
 
-#Input account ID to retrieve account info
-account_id = input("Please enter your FPL account ID: ")
+def fetch_fpl_data(account_id):
 
-#Call FPL API
-response = requests.get("https://fantasy.premierleague.com/api/entry/" + account_id + "/history/")
+    #Call FPL API
+    response = requests.get("https://fantasy.premierleague.com/api/entry/" + account_id + "/history/")
 
-#Parse the JSON data
-data = response.json()
+    return response.json()
 
-#Initialize empty lists to hold gameweek numbers and ranks
-gameweeks = []
-ranks = []
+def process_fpl_data(data):
 
-#Loop through all relevant events in the 'current' list
-for event in data['current']:
-    gameweek_number = event["event"]        #The gameweek/event number
-    overall_rank = event["overall_rank"]    #Overall rank for that gameweek
-    points = event["points"]                #Points scored in that gameweek
+    #Initialize empty lists to hold gameweek numbers and ranks
+    gameweeks = []
+    ranks = []
 
-    #Append the data to the lists
-    gameweeks.append(gameweek_number)
-    ranks.append(overall_rank)
+    #Loop through events in current to get data
+    for event in data["current"]:
+        gameweeks.append(event["event"])
+        ranks.append(event["overall_rank"])
 
-    #Print data for each gameweek
-    print(f"Gameweek {gameweek_number}: Rank: {overall_rank}, Points: {points}")
+        #Print data for each gameweek
+        print(f"Gameweek {event['event']}: Rank: {event['overall_rank']}, Points: {event['points']}")
 
-#Plot the rank per gameweek using Matplotlib
-plt.plot(gameweeks, ranks, marker='o')
-plt.xlabel('Gameweek')
-plt.ylabel('Overall Rank')
-plt.title('Overall Rank per Gameweek')
-plt.gca().invert_yaxis()                #Invert y-axis to show lower rank at the top
-plt.grid(True)
-plt.show()
+    return gameweeks, ranks
+
+def plot_fpl_rank(gameweeks, ranks):
+
+    #Plot the rank per gameweek using Matplotlib
+    plt.plot(gameweeks, ranks, marker='o')
+    plt.xlabel('Gameweek')
+    plt.ylabel('Overall Rank')
+    plt.title('Overall Rank per Gameweek')
+    plt.gca().invert_yaxis()                #Invert y-axis to show lower rank at the top
+    plt.grid(True)
+    plt.show()
+
+def main():
+
+    #Input account ID to retrieve account info
+    account_id = input("Please enter your FPL account ID: ")
+
+    #Fetch data & process
+    data = fetch_fpl_data(account_id)
+    gameweeks, ranks = process_fpl_data(data)
+
+    #Plot rank per gameweek
+    plot_fpl_rank(gameweeks, ranks)
+
+if __name__ == "__main__":
+    main()
