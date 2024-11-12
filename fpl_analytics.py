@@ -81,6 +81,55 @@ def plot_fpl_rank(gameweeks, ranks):
         print(f"An error occured while plotting: {e}")
 
 
+
+def process_team_value(data):
+
+    #Initialize empty lists to hold gameweek numbers and ranks
+    gameweeks = []
+    team_value = []
+
+    if data is None:
+        print("No data to process.")
+        return gameweeks, team_value
+    
+    try:
+        #Loop through events in current to get data
+        for event in data["current"]:
+            gameweeks.append(event["event"])
+            
+            team_value.append(event["value"] / 10)
+
+            #Print data for each gameweek
+            print(f"Gameweek {event['event']}: Value: {event['value'] / 10}m£")
+    
+    #Raise exceptions for possible errors
+    except KeyError as e:
+        print(f"Data format error: missing key {e}. The API response structure may have changed.")
+    except TypeError:
+        print("Data format error: 'data' is not in the expected format")
+
+    return gameweeks, team_value
+
+def plot_team_value(gameweeks, team_value):
+
+    #Check data present
+    if not gameweeks or not team_value:
+        print("No data available to plot.")
+        return
+    
+    #Plot the team value per gameweek using Matplotlib
+    try:
+        plt.plot(gameweeks, team_value, marker='o')
+        plt.xlabel('Gameweek')
+        plt.ylabel('Team Value (m£)')
+        plt.title('Team Value per Gameweek')
+        plt.grid(True)
+        plt.show()
+
+    except Exception as e:
+        print(f"An error occurred while plotting: {e}")
+    
+
 def main():
 
     while True:
@@ -99,10 +148,25 @@ def main():
 
     #Fetch data & process
     data = fetch_fpl_data(account_id)
-    gameweeks, ranks = process_fpl_data(data)
 
-    #Plot rank per gameweek
-    plot_fpl_rank(gameweeks, ranks)
+    # Provide feature choices to the user
+    print("\nChoose a feature to display:")
+    print("1. Display and plot overall rank per gameweek.")
+    print("2. Display and plot team value per gameweek.")
+    
+    choice = input("Enter 1 or 2: ")
+
+    if choice == "1":
+        gameweeks, ranks = process_fpl_data(data)
+        plot_fpl_rank(gameweeks, ranks)
+
+    elif choice == "2":
+        gameweeks, team_value = process_team_value(data)
+        plot_team_value(gameweeks, team_value)
+
+    else:
+        print("Invalid choice. Please restart and enter 1 or 2.")
+    
 
 if __name__ == "__main__":
     main()
